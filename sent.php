@@ -1,3 +1,31 @@
+<?php
+
+date_default_timezone_set('Asia/Tokyo');
+
+$name = $_POST['name'];
+$email = $_POST['email'];
+$body = $_POST['body'];
+
+try {
+$pdo = new PDO('mysql:host=localhost;dbname=form_db;charset=utf8','root','Sogekinngu135@',
+array(PDO::ATTR_EMULATE_PREPARES => false));
+} catch (PDOException $e) {
+ exit('データベース接続失敗。'.$e->getMessage());
+}
+
+$stmt = $pdo -> prepare("INSERT INTO form_db (name, email, body, created_at) VALUES (:name, :email, :body, now())");
+$stmt->bindParam(':name', $name, PDO::PARAM_STR);
+$stmt->bindParam(':email', $email, PDO::PARAM_STR);
+$stmt->bindParam(':body', $body, PDO::PARAM_STR);
+
+$stmt->execute();
+
+?>
+
+
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,35 +36,6 @@
 <body>
 <div class="main">
 
-<?php
-// データベース名の定義
-define('DB_DATABASE', 'form_db');
-// データベースユーザー名の定義
-define('DB_USERNAME', 'root');
-// データベースユーザーの接続パスワードの定義
-define('DB_PASSWORD', 'Sogekinngu135@');
-// DSN（データソースネーム）の定義
-define('DB_DSN', 'mysql:host=localhost;charset=utf8;dbname='.DB_DATABASE);
-
-try {
-    // コンストラクタ作成の際に、DSN・ユーザー名・パスワード情報を渡す
-    $db = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
-    // エラーが起きた際にExceptionを出力する設定
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // クエリ実行
-    $statement = $db->prepare("INSERT INTO user(name, email, body) VALUES(?, ?, ?);");
-
-    $statement->execute(['山田花子', 'yamada@example.com', 'お問い合わせ内容文']);
-    
-    echo "Inserted Id : ".$db->lastInsertId();
-} catch (PDOException $e) {
-
-    var_dump($e);
-
-    exit;
-}
-
-?>
   <div class="contact-form">
 
   <h2>お問い合わせいただきありがとうございます。</h2>
@@ -48,20 +47,7 @@ try {
   <div class="form-item">■ お問い合わせ内容</div>
   <?php echo $_POST['body']; ?>
 
- <?php
- mb_language("Japanese");
- mb_internal_encoding("UTF-8");
 
- $name = $_POST['name'];
- $email = $_POST['email'];
- $body = $_POST['body'];
-
- if(mb_send_mail($name, $email, $body)){
- echo "メールを送信しました";
- } else {
- echo "メールの送信に失敗しました";
-}
- ?>
 </div>
   </div>
 
